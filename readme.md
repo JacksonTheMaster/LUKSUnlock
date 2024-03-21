@@ -40,7 +40,7 @@ This project was built with bash for debian based Linux environments.
 
 ## What does this do?
 
-This innovative script revolutionizes the process of securing your data by automating the creation of a LUKS-encrypted container, with a twist - it unlocks using your YubiKey. Imagine the simplicity: Plug in your YubiKey, boot your device, and voila, your mount point remains securely unlocked as long as you're using it, yet instantly locks the moment you or anybody else may boot without the YubiKey.This method not only elevates the security of your data storage but does so with an unprecedented level of convenience and ease.
+This script revolutionizes the process of securing your data by automating the creation of a LUKS-encrypted container, with a twist - it unlocks using your YubiKey. Imagine the simplicity: Plug in your YubiKey, boot your device, and voila, your mount point remains securely unlocked as long as you're using it, yet instantly locks the moment you or anybody else may boot without the YubiKey.This method not only elevates the security of your data storage but does so with an unprecedented level of convenience and ease.
 
 Designed for users who prioritize robust security without wanting to compromise on accessibility, this script transforms the way you protect your digital life. Whether you're safeguarding sensitive work documents, personal memories, or critical system files, our YubiKey-LUKS integration ensures your data remains secure yet effortlessly accessible with just a simple plug & boot with your YubiKey.
 
