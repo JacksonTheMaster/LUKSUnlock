@@ -64,7 +64,7 @@ Embark on fortifying your data security with a few simple steps. Whether you're 
    ```
 ### Setup
 
-Embark on securing your digital assets by simply executing `install.sh`. This initiates a guided setup, meticulously crafting a LUKS encrypted container, followed by configuring your YubiKey for a seamless security experience.
+Embark on securing your digital assets by simply executing `chmod +x install.sh` followed by `sudo install.sh`. This initiates a guided setup, meticulously crafting a LUKS encrypted container, followed by configuring your YubiKey for a seamless security experience.
 
 **Please Note:**
 
