@@ -1,0 +1,9 @@
+[Unit]
+Description=YubiKey LUKS Unlock
+After=local-fs.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/yubikey-luks-unlock
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target
