@@ -71,13 +71,25 @@ sudo mount /dev/mapper/$MAPPER $MOUNT_DIRECTORY
 # Configure the YubiKey
 sudo systemctl start pcscd
 sudo systemctl enable pcscd
-echo "enter y"
+echo -e "\033[0;32mStarting YubiKey configuration for challenge-response...\033[0m"
+echo -e "\033[0;33mYou will be prompted to confirm programming a challenge-response credential in slot 2.\033[0m"
+echo -e "\033[0;33mPlease press 'y' when prompted.\033[0m"
 ykman otp chalresp --generate 2
+
+echo -e "\033[0;32mGenerating a response from YubiKey for a fixed challenge to use as the new passphrase.\033[0m"
+echo -e "\033[0;33mThis requires manual input. Please follow the instructions carefully.\033[0m"
+echo -e "\033[0;33mA challenge-response has been generated. We will now add this as a new key to the LUKS container.\033[0m"
+echo -e "\033[0;33mFirst, you will be prompted for an existing passphrase to authorize adding the new key.\033[0m"
+echo -e "\033[0;33mAfterward, you will be asked to enter a 'new passphrase'. Here, input the YubiKey response shown below.\033[0m"
 YUBIKEY_RESPONSE=$(ykchalresp -2 "LUKSChallenge")
-echo "USE THIS NEW PASSPHRASE IN THE 2nd NEXT PROMPT:"
-echo "I have no idea why we get the first one :D"
-echo "$YUBIKEY_RESPONSE"
+echo -e "\033[0;34mYubiKey response (use this as the new passphrase when prompted): $YUBIKEY_RESPONSE\033[0m"
+echo -e "\033[0;34m$YUBIKEY_RESPONSE\033[0m"
+
+echo -e "\033[0;32mProceeding to add a new key to the LUKS container. Start with the existing passphrase!.\033[0m"
 sudo cryptsetup luksAddKey $CONTAINER_STORAGE/$CONTAINER_FILE
+
+echo -e "\033[0;32mThe YubiKey has been configured, rather or not successfully.. Remember, the response shown above is also a new passphrase in case manual unlocking is required.\033[0m"
+
 
 sudo curl -o /usr/local/bin/yubikey-luks-unlock https://raw.githubusercontent.com/JacksonTheMaster/LUKSUnlock/main/yubikey-luks-unlock
 # Replace placeholders in the yubikey-luks-unlock script

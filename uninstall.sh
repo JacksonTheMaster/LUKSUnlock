@@ -28,7 +28,8 @@ done
 
 # Disclaimer
 echo "This script will UNINSTALL the LUKS container unlocked by YubiKey setup."
-echo "It will NOT delete the LUKS container itself but will remove the YubiKey configuration and related files."
+echo "It will NOT delete the LUKS container if you changed the default install locataon." 
+echo "You can use args to specify your enviornment, or it will only be able to remove the YubiKey configuration and related files."
 echo "Please ensure that you have backed up any important data before proceeding."
 
 # Prompt for confirmation
@@ -37,12 +38,31 @@ case $user_confirmation in
     [Yy]* ) ;;
     * ) echo "Uninstallation aborted by user."; exit 1;;
 esac
+# Additional safety check: Confirm with the user before proceeding
+echo "WARNING: This will permanently delete the LUKS container and all its data."
+read -p "Are you sure you want to proceed? (y/N): " confirm_deletion
+if [[ $confirm_deletion != "y" ]]; then
+    echo "Aborting uninstallation."
+    exit 1
+fi
 
-# Unmount the container and close it
-echo "Unmounting the LUKS container..."
-sudo umount $MOUNT_DIRECTORY
-echo "Closing the LUKS container..."
-sudo cryptsetup close $MAPPER
+# Unmount the container if mounted
+if mount | grep -q $MOUNT_DIRECTORY; then
+    echo "Unmounting $MOUNT_DIRECTORY..."
+    sudo umount $MOUNT_DIRECTORY
+fi
+
+# Close the LUKS container
+if [ -e "/dev/mapper/$MAPPER" ]; then
+    echo "Closing the LUKS container..."
+    sudo cryptsetup close $MAPPER
+fi
+
+# Remove the LUKS container file
+if [ -f "$CONTAINER_STORAGE/$CONTAINER_FILE" ]; then
+    echo "Removing the LUKS container file..."
+    sudo rm -f "$CONTAINER_STORAGE/$CONTAINER_FILE"
+fi
 
 # Remove the systemd service
 echo "Disabling and removing the YubiKey LUKS unlock service..."
@@ -64,5 +84,5 @@ case $uninstall_pkgs in
         ;;
     * ) echo "Skipping package uninstallation.";;
 esac
-
-echo "Uninstallation complete. Note that the LUKS container itself and the mount directory have not been deleted. Please handle them as needed."
+systemctl daemon-reload
+echo "Uninstallation complete."
