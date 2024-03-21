@@ -5,7 +5,7 @@ CONTAINER_STORAGE="/cryptstore" # Container storage path
 CONTAINER_FILE="LUKS" # Container file name
 MOUNT_DIRECTORY="/home/jmg/secure" # Mount directory
 FILE_SIZE_MB=276 # Size of the container in megabytes
-MAPPER="LUKSYubiKey"
+MAPPER="LUKSUnlock"
 
 # Create the container storage location
 sudo mkdir -p $CONTAINER_STORAGE
