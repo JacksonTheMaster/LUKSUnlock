@@ -1,44 +1,42 @@
 #!/bin/bash
 
-#gehört in /usr/local/bin/yubikey-luks-unlock
+# This belongs in /usr/local/bin/yubikey-luks-unlock
 
-# Pfad zum LUKS-Container
-DEVICE="/cryptstore/LUKS"
-# Name des entsperrten Mappers
-MAPPER="LUKSUnlock"
-# Pfad, wo der entsperrte Container eingehängt werden soll
-MOUNT_POINT="/home/jmg/secure"
+# Path to the LUKS container
+DEVICE="${DEVICE}" # Placeholder to be replaced by installer
+# Name of the unlocked mapper
+MAPPER="${MAPPER}" # Placeholder to be replaced by installer
+# Path where the unlocked container will be mounted
+MOUNT_POINT="${MOUNT_POINT}" # Placeholder to be replaced by installer
 
 echo "Sending challenge to YubiKey..."
 
-# Sende eine Challenge an den YubiKey und erhalte die Response
+# Send a challenge to the YubiKey and get the response
 YUBIKEY_RESPONSE=$(ykchalresp -2 "LUKSChallenge")
 
 echo "YubiKey Response: $YUBIKEY_RESPONSE"
 
-# Überprüfe Response
+# Check the response
 if [ -z "$YUBIKEY_RESPONSE" ]; then
-    echo "Keine Antwort vom YubiKey erhalten."
+    echo "No response received from YubiKey."
     exit 1
 fi
 
-echo "Versuche, den Container mit der YubiKey-Response zu entsperren..."
+echo "Attempting to unlock the container with the YubiKey response..."
 
-# Versuche, den Container mit der erhaltenen YubiKey-Response zu entsperren
+# Attempt to unlock the container with the received YubiKey response
 echo "$YUBIKEY_RESPONSE" | cryptsetup open $DEVICE $MAPPER
-# Überprüfe, ob das Gerät erfolgreich entsperrt wurde
+# Check if the device was successfully unlocked
 if [ $? -eq 0 ]; then
-    echo "Container erfolgreich entsperrt. Versuche zu mounten..."
-    # Mounte den Container, wenn er erfolgreich entsperrt wurde
+    echo "Container successfully unlocked. Attempting to mount..."
+    # Mount the container if it was successfully unlocked
     sudo mount /dev/mapper/$MAPPER $MOUNT_POINT
     if [ $? -eq 0 ]; then
-        echo "Container erfolgreich in $MOUNT_POINT eingehängt."
+        echo "Container successfully mounted at $MOUNT_POINT."
     else
-        echo "Fehler beim Mounten des Containers."
+        echo "Error mounting the container."
     fi
 else
-    echo "Entschlüsselung fehlgeschlagen."
+    echo "Decryption failed."
     exit 1
 fi
-
-
