@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
 # Variables
 CONTAINER_STORAGE="/cryptstore" # Container storage path
 CONTAINER_FILE="LUKS" # Container file name
@@ -8,8 +15,8 @@ FILE_SIZE_MB=276 # Size of the container in megabytes
 MAPPER="LUKSUnlock"
 
 # Disclaimer and prerequisites
-echo "Disclaimer: This installer will configure a LUKS container to be unlocked with a YubiKey on boot."
-echo "Prerequisites:"
+echo -e "${YELLOW}Disclaimer:${NC} This installer will configure a LUKS container to be unlocked with a YubiKey on boot."
+echo -e "${YELLOW}Prerequisites:${NC}"
 echo "- A plugged in YubiKey with OTP slot 2 empty"
 echo "- Sudo privileges"
 echo "- Internet connection for downloading necessary packages and scripts."
@@ -17,12 +24,7 @@ echo "This script requires user inputs. Do NOT curl this into bash."
 echo "Make sure to safely store the first passphrase you set up"
 echo "Please ensure all prerequisites are met before proceeding."
 
-# Prompt user for confirmation
-read -p "Do you wish to continue with the installation? (y/N): " user_confirmation
-case $user_confirmation in
-    [Yy]* ) ;;
-    * ) echo "Installation aborted by user."; exit 1;;
-esac
+
 
 # Parse command line options
 while getopts "s:f:d:b:m:h" opt; do
@@ -44,28 +46,39 @@ while getopts "s:f:d:b:m:h" opt; do
   esac
 done
 
+# Prompt user for confirmation
+read -p "Do you wish to continue with the installation? (y/N): " user_confirmation
+case $user_confirmation in
+    [Yy]* ) ;;
+    * ) echo -e "${RED}Installation aborted by user.${NC}"; exit 1;;
+esac
+
 # Create the container storage location
 sudo mkdir -p $CONTAINER_STORAGE
 
-# Create the empty container
+# Creating the empty container
+echo -e "${GREEN}Creating an empty container of size ${FILE_SIZE_MB}MB...${NC}"
 sudo dd if=/dev/zero of=$CONTAINER_STORAGE/$CONTAINER_FILE bs=1M count=$FILE_SIZE_MB
 
-# Install necessary packages
+# Installing necessary packages
+echo -e "${GREEN}Installing necessary packages...${NC}"
 sudo apt-get update
 sudo apt-get install -y cryptsetup
 sudo apt-get install -y yubikey-manager yubikey-personalization pcscd
 
 # Initialize and open the LUKS container
+echo -e "${GREEN}Initializing and opening the LUKS container...${NC}"
+echo -e "${RED}Here, you set the first / recovery passphrase for your Secure Store. Keep this passphrase secret, and don't loose it.${NC}"
 sudo cryptsetup luksFormat $CONTAINER_STORAGE/$CONTAINER_FILE
 sudo cryptsetup open $CONTAINER_STORAGE/$CONTAINER_FILE $MAPPER
 
-# Format the container with ext4
+# Formatting the container
+echo -e "${GREEN}Formatting the container with ext4...${NC}"
 sudo mkfs.ext4 /dev/mapper/$MAPPER
 
-# Create a directory for mounting the container
+# Mounting the container
+echo -e "${GREEN}Mounting the container...${NC}"
 sudo mkdir -p $MOUNT_DIRECTORY
-
-# Mount the container
 sudo mount /dev/mapper/$MAPPER $MOUNT_DIRECTORY
 
 # Configure the YubiKey
@@ -82,9 +95,8 @@ echo -e "\033[0;33mA challenge-response has been generated. We will now add this
 echo -e "\033[0;33mFirst, you will be prompted for an existing passphrase to authorize adding the new key.\033[0m"
 echo -e "\033[0;33mAfterward, you will be asked to enter a 'new passphrase'. Here, input the YubiKey response shown below.\033[0m"
 YUBIKEY_RESPONSE=$(ykchalresp -2 "LUKSChallenge")
-echo -e "\033[0;34mYubiKey response (use this as the new passphrase when prompted): $YUBIKEY_RESPONSE\033[0m"
+echo -e "\033[0;34mYubiKey response: Use this as the new passphrase when prompted.\033[0m"
 echo -e "\033[0;34m$YUBIKEY_RESPONSE\033[0m"
-
 echo -e "\033[0;32mProceeding to add a new key to the LUKS container. Start with the existing passphrase!.\033[0m"
 sudo cryptsetup luksAddKey $CONTAINER_STORAGE/$CONTAINER_FILE
 
@@ -99,7 +111,8 @@ sudo sed -i "s#\${MOUNT_POINT}#$MOUNT_DIRECTORY#g" /usr/local/bin/yubikey-luks-u
 
 sudo chmod +x /usr/local/bin/yubikey-luks-unlock
 
-#Systemd Service
+# Setting up systemd service
+echo -e "${GREEN}Setting up systemd service for YubiKey LUKS unlock...${NC}"
 sudo curl -o /etc/systemd/system/yubikey-luks-unlock.service https://raw.githubusercontent.com/JacksonTheMaster/LUKSUnlock/main/yubikey-luks-unlock.service
 
 sudo umount $MOUNT_DIRECTORY
@@ -108,3 +121,5 @@ sudo cryptsetup close $MAPPER
 # Activate and start the systemd service
 sudo systemctl enable yubikey-luks-unlock.service
 sudo systemctl start yubikey-luks-unlock.service
+
+echo -e "${GREEN}Installation completed. Your system is now configured to unlock the LUKS container with a YubiKey on boot. Make sure to test it! If the LUKS works, you'll find a lost'nfound in your LUKS store.${NC}"
