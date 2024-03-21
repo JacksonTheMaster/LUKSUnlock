@@ -59,7 +59,7 @@ sudo mkdir -p $CONTAINER_STORAGE
 # Creating the empty container
 echo -e "${GREEN}Creating an empty container of size ${FILE_SIZE_MB}MB...${NC}"
 echo -e "${GREEN}This could take a while${NC}"
-sudo dd if=/dev/zero of=$CONTAINER_STORAGE/$CONTAINER_FILE bs=1M count=$FILE_SIZE_MB
+sudo dd if=/dev/zero of=$CONTAINER_STORAGE/$CONTAINER_FILE bs=1M count=$FILE_SIZE_MB status=progress
 
 # Installing necessary packages
 echo -e "${GREEN}Installing necessary packages...${NC}"
