@@ -24,7 +24,7 @@
   <a href="https://github.com/JacksonTheMaster/LUKSUnlock"><strong>Explore the LUKSUnlock documentation and get started »</strong></a>
   <a href="https://docs.jmg-it.de/docs/"><strong>Explore the LUKSUnlock docs in the JMG Docs (not public yet :D) »</strong></a>
 </p>
-
+</div>
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
