@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#gehört in /usr/local/bin/yubikey-luks-unlock
+
+# Pfad zum LUKS-Container
+DEVICE="/cryptstore/LUKS"
+# Name des entsperrten Mappers
+MAPPER="LUKSUnlock"
+# Pfad, wo der entsperrte Container eingehängt werden soll
+MOUNT_POINT="/home/jmg/secure"
+
+echo "Sending challenge to YubiKey..."
+
+# Sende eine Challenge an den YubiKey und erhalte die Response
+YUBIKEY_RESPONSE=$(ykchalresp -2 "LUKSChallenge")
+
+echo "YubiKey Response: $YUBIKEY_RESPONSE"
+
+# Überprüfe Response
+if [ -z "$YUBIKEY_RESPONSE" ]; then
+    echo "Keine Antwort vom YubiKey erhalten."
+    exit 1
+fi
+
+echo "Versuche, den Container mit der YubiKey-Response zu entsperren..."
+
+# Versuche, den Container mit der erhaltenen YubiKey-Response zu entsperren
+echo "$YUBIKEY_RESPONSE" | cryptsetup open $DEVICE $MAPPER
+# Überprüfe, ob das Gerät erfolgreich entsperrt wurde
+if [ $? -eq 0 ]; then
+    echo "Container erfolgreich entsperrt. Versuche zu mounten..."
+    # Mounte den Container, wenn er erfolgreich entsperrt wurde
+    sudo mount /dev/mapper/$MAPPER $MOUNT_POINT
+    if [ $? -eq 0 ]; then
+        echo "Container erfolgreich in $MOUNT_POINT eingehängt."
+    else
+        echo "Fehler beim Mounten des Containers."
+    fi
+else
+    echo "Entschlüsselung fehlgeschlagen."
+    exit 1
+fi
+
+
