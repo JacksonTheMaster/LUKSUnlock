@@ -14,8 +14,6 @@ echo "Sending challenge to YubiKey..."
 # Send a challenge to the YubiKey and get the response
 YUBIKEY_RESPONSE=$(ykchalresp -2 "LUKSChallenge")
 
-echo "YubiKey Response: $YUBIKEY_RESPONSE"
-
 # Check the response
 if [ -z "$YUBIKEY_RESPONSE" ]; then
     echo "No response received from YubiKey."
