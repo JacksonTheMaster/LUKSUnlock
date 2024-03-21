@@ -42,13 +42,12 @@ echo "I have no idea why we get the first one :D"
 echo "$YUBIKEY_RESPONSE"
 sudo cryptsetup luksAddKey $CONTAINER_STORAGE/$CONTAINER_FILE
 
-sudo curl -o /usr/local/bin/yubikey-luks-unlock https://github.com/jacksonthemaster/CHANGEME
+sudo curl -o /usr/local/bin/yubikey-luks-unlock https://raw.githubusercontent.com/JacksonTheMaster/LUKSUnlock/main/yubikey-luks-unlock
 
 sudo chmod +x /usr/local/bin/yubikey-luks-unlock
 
 #Systemd Service
-sudo curl -o /etc/systemd/system/yubikey-luks-unlock.service https://github.com/jacksonthemaster/CHANGEME
-
+sudo curl -o /etc/systemd/system/yubikey-luks-unlock.service https://raw.githubusercontent.com/JacksonTheMaster/LUKSUnlock/main/yubikey-luks-unlock.service
 
 sudo umount $MOUNT_DIRECTORY
 sudo cryptsetup close $MAPPER
